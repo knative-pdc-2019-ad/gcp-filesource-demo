@@ -1,0 +1,14 @@
+apiVersion: build.knative.dev/v1alpha1
+kind: Build
+metadata:
+  name: jib-gradle-build
+spec:
+  source:
+    git:
+      url: https://github.com/knative-pdc-2019-ad/parser-demo
+      revision: master
+  template:
+    name: jib-gradle
+#    arguments:
+#      - name: IMAGE
+#        value: skylab00/kn-parser

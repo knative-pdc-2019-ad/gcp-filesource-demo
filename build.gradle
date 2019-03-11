@@ -2,7 +2,7 @@ buildscript {
     ext {
         lombokVer = '1.18.2'
         springCloudBom = 'Greenwich.RELEASE'
-        csvMapperVer = '6.0.10'
+        cloudeventsApiVer = '0.2.1'
     }
     
     repositories {
@@ -13,10 +13,12 @@ buildscript {
     }
 }
 
+
 plugins {
     id 'idea'
     id "net.ltgt.apt" version "0.14"
     id "org.springframework.boot" version "2.1.2.RELEASE" apply false
+    id 'com.google.cloud.tools.jib' version '0.9.10'
 }
 
 group 'com.appdirect.experimental'
@@ -50,11 +52,14 @@ dependencies {
     compileOnly "org.projectlombok:lombok:$lombokVer"
     annotationProcessor "org.projectlombok:lombok:$lombokVer"
 
-    compile "org.springframework.boot:spring-boot-starter"
+    compile "org.springframework.boot:spring-boot-starter-web"
 
-    compile "org.simpleflatmapper:sfm-csv:$csvMapperVer"
+    compile "io.cloudevents:cloudevents-api:$cloudeventsApiVer"
 
     compile "org.springframework.cloud:spring-cloud-gcp-starter"
     compile "org.springframework.cloud:spring-cloud-gcp-storage"
-    compile "org.springframework.cloud:spring-cloud-gcp-pubsub"
+//    compile "org.springframework.cloud:spring-cloud-gcp-pubsub"
+
+    compile "org.springframework.cloud:spring-cloud-stream"
+    compile "org.springframework.cloud:spring-cloud-gcp-pubsub-stream-binder"
 }

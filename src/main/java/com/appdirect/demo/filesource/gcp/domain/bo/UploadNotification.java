@@ -1,4 +1,4 @@
-package com.appdirect.demo.functions.domain.bo;
+package com.appdirect.demo.filesource.gcp.domain.bo;
 
 import lombok.Builder;
 import lombok.Data;

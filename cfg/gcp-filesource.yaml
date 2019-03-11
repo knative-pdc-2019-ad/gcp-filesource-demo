@@ -1,0 +1,10 @@
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: ContainerSource
+metadata:
+  name: parser-source
+spec:
+  image: skylab00/kn-parser:m1
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: usage-events

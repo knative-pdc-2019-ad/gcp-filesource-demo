@@ -1,0 +1,10 @@
+cloudevents:
+  source:
+    client:
+      targetUri: ${sink:http://localhost:8080}
+      connectTimeout: 10000
+      readTimeout: 12000
+    event:
+      eventType: Parser.File.UsageEvents
+      source: /parser-demo
+      contentType: application/json
