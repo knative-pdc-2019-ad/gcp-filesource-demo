@@ -5,11 +5,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UploadNotification {
+public class UploadNotificationPayload {
 
+  private String bucket;
+  private String name;
   private String eventType;
-  private String payloadFormat;
-  private String bucketId;
-  private String objectId;
-  private String objectGeneration;
 }

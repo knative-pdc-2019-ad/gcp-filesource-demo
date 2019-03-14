@@ -1,12 +1,12 @@
 package com.appdirect.demo.filesource.gcp;
 
-import static java.lang.String.format;
-
 import com.appdirect.demo.filesource.gcp.cloudevents.CloudEventsClient;
 import com.appdirect.demo.filesource.gcp.domain.bo.SourceEvent;
-import com.appdirect.demo.filesource.gcp.domain.bo.UploadNotification;
+import com.appdirect.demo.filesource.gcp.domain.bo.UploadNotificationPayload;
 import com.appdirect.demo.filesource.gcp.domain.exception.GcpException;
 import com.appdirect.demo.filesource.gcp.domain.exception.GcpIOException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageException;
 import java.io.IOException;
@@ -30,25 +30,32 @@ public class GcpHandler {
   private Storage storage;
   private CloudEventsClient client;
   private ApplicationContext appContext;
+  private final ObjectMapper mapper;
 
   @Autowired
   public GcpHandler(ApplicationContext appContext, Storage storage, CloudEventsClient client) {
     this.appContext = appContext;
     this.storage = storage;
     this.client = client;
+
+    this.mapper = new ObjectMapper();
+    this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
   @StreamListener(Sink.INPUT)
-  public void handleMessage(Message<UploadNotification> message) {
+  public void handleMessage(Message<String> message) {
 
-    UploadNotification payload = message.getPayload();
-    log.info("Received: {}", payload);
+    log.info("Payload: {}", message.getPayload());
 
     try {
-      Resource gcsFile = appContext
-          .getResource(format("gs://%s/%s", payload.getBucketId(), payload.getObjectId()));
+      UploadNotificationPayload payload = this.mapper.readValue(message.getPayload(),
+          UploadNotificationPayload.class);
 
-      if (gcsFile.exists() && "OBJECT_FINALIZE".equalsIgnoreCase(payload.getEventType())) {
+      Resource gcsFile = appContext
+          .getResource(String.format("gs://%s/%s", payload.getBucket(), payload.getName()));
+
+      if (gcsFile.exists() && (payload.getEventType() == null ||
+          "OBJECT_FINALIZE".equalsIgnoreCase(payload.getEventType()))) {
 
         String content = StreamUtils
             .copyToString(gcsFile.getInputStream(), Charset.defaultCharset());
@@ -64,20 +71,20 @@ public class GcpHandler {
 
       } else {
         log.error("Not a valid payload, bucket: {}, object: {}",
-            payload.getBucketId(), payload.getObjectId());
+            payload.getBucket(), payload.getName());
       }
 
-//    try {
-//      Blob gcsFile = gcsFile(payload.getBucketId(), payload.getObjectId());
-//      Path dest = downloadLocal(gcsFile);
-//      Files.lines(dest)
-//          .forEach(re ->
-//              client.publish(SourceEvent.builder()
-//                  .referenceId(UUID.randomUUID().toString())
-//                  .eventStr(re)
-//                  .build())
-//          );
-//      removeRemote(gcsFile);
+      //    try {
+      //      Blob gcsFile = gcsFile(payload.getBucketId(), payload.getObjectId());
+      //      Path dest = downloadLocal(gcsFile);
+      //      Files.lines(dest)
+      //          .forEach(re ->
+      //              client.publish(SourceEvent.builder()
+      //                  .referenceId(UUID.randomUUID().toString())
+      //                  .eventStr(re)
+      //                  .build())
+      //          );
+      //      removeRemote(gcsFile);
 
     } catch (StorageException e) {
       throw new GcpException("Storage API error", e);

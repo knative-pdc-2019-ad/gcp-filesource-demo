@@ -9,7 +9,7 @@ cloudevents:
       eventType: Source.File.Usage
       source: /parser-demo
       contentType: application/json
-      
+
 spring:
   cloud:
     stream:
@@ -17,5 +17,6 @@ spring:
         input:
           destination: notifications
     gcp:
+      project-id: knative-broker
       credentials:
         encoded-key: ${gcp.credentials.encoded-key}
