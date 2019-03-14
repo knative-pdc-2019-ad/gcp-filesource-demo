@@ -10,11 +10,7 @@ public class SourceEvent {
 
   @NonNull
   private String referenceId;
-  private Long processingTimeMillis;
 
   @NonNull
   private String eventStr;
-
-  @NonNull
-  private String configId;
 }

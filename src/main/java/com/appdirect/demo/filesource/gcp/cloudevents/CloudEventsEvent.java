@@ -3,7 +3,6 @@ package com.appdirect.demo.filesource.gcp.cloudevents;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.CloudEventBuilder;
 import java.net.URI;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +23,6 @@ public class CloudEventsEvent {
     return new CloudEventBuilder()
         .data(o)
         .id(UUID.randomUUID().toString())
-        .time(ZonedDateTime.now())
         .type(eventType)
         .source(URI.create(source))
         .contentType(contentType)

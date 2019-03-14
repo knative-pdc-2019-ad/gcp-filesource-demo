@@ -2,9 +2,20 @@ cloudevents:
   source:
     client:
       targetUri: ${sink:http://localhost:8080}
+#      targetUri: https://test-kn.free.beeceptor.com
       connectTimeout: 10000
-      readTimeout: 12000
+      readTimeout: 1000
     event:
-      eventType: Parser.File.UsageEvents
+      eventType: Source.File.Usage
       source: /parser-demo
       contentType: application/json
+      
+spring:
+  cloud:
+    stream:
+      bindings:
+        input:
+          destination: notifications
+    gcp:
+      credentials:
+        encoded-key: ${gcp.credentials.encoded-key}

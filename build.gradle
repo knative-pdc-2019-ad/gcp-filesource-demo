@@ -3,6 +3,7 @@ buildscript {
         lombokVer = '1.18.2'
         springCloudBom = 'Greenwich.RELEASE'
         cloudeventsApiVer = '0.2.1'
+        apacheHttpVer = '4.5.7'
     }
     
     repositories {
@@ -22,7 +23,7 @@ plugins {
 }
 
 group 'com.appdirect.experimental'
-version '0.0.1-SNAPSHOT'
+version '0.0.1'
 
 
 apply plugin: 'java'
@@ -53,13 +54,20 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVer"
 
     compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.apache.httpcomponents:httpclient:$apacheHttpVer"
 
     compile "io.cloudevents:cloudevents-api:$cloudeventsApiVer"
 
     compile "org.springframework.cloud:spring-cloud-gcp-starter"
     compile "org.springframework.cloud:spring-cloud-gcp-storage"
-//    compile "org.springframework.cloud:spring-cloud-gcp-pubsub"
 
     compile "org.springframework.cloud:spring-cloud-stream"
     compile "org.springframework.cloud:spring-cloud-gcp-pubsub-stream-binder"
+}
+
+jib {
+    to {
+        image = "gcr.io/pdc-19/gcp-source:${project.version}"
+        credHelper = 'gcr'
+    }
 }
