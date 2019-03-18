@@ -1,5 +1,8 @@
 package com.appdirect.demo.filesource.gcp;
 
+import static java.lang.Runtime.getRuntime;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+
 import com.appdirect.demo.filesource.gcp.cloudevents.CloudEventsClient;
 import com.appdirect.demo.filesource.gcp.domain.bo.SourceEvent;
 import com.appdirect.demo.filesource.gcp.domain.bo.UploadNotificationPayload;
@@ -12,6 +15,7 @@ import com.google.cloud.storage.StorageException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +35,7 @@ public class GcpHandler {
   private CloudEventsClient client;
   private ApplicationContext appContext;
   private final ObjectMapper mapper;
+  private final ExecutorService executors;
 
   @Autowired
   public GcpHandler(ApplicationContext appContext, Storage storage, CloudEventsClient client) {
@@ -38,6 +43,7 @@ public class GcpHandler {
     this.storage = storage;
     this.client = client;
 
+    this.executors = newFixedThreadPool(getRuntime().availableProcessors() * 4);
     this.mapper = new ObjectMapper();
     this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
@@ -61,14 +67,13 @@ public class GcpHandler {
             .copyToString(gcsFile.getInputStream(), Charset.defaultCharset());
 
         Stream.of(content.split("\\r?\\n"))
-            .forEach(re -> {
+            .forEach(re -> executors.submit(() -> {
               log.info("Sending Record: {}", re);
               client.publish(SourceEvent.builder()
                   .referenceId(UUID.randomUUID().toString())
                   .eventStr(re)
                   .build());
-            });
-
+            }));
       } else {
         log.error("Not a valid payload, bucket: {}, object: {}",
             payload.getBucket(), payload.getName());

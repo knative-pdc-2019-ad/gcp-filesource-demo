@@ -4,6 +4,9 @@ import io.cloudevents.CloudEvent;
 import java.io.IOException;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
@@ -20,8 +23,6 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class CloudEventsClient {
 
-//  public final static String MEDIA_TYPE_CLOUD_EVENTS = "application/cloudevents+json";
-
   private final RestTemplate restClient;
 
   private ClientProperties clientProperties;
@@ -35,10 +36,17 @@ public class CloudEventsClient {
   }
 
   private RestTemplate restClient() {
-    HttpComponentsClientHttpRequestFactory httpRequestFactory
-        = new HttpComponentsClientHttpRequestFactory();
+    HttpClient httpClient = HttpClientBuilder.create()
+        .setConnectionManager(new PoolingHttpClientConnectionManager() {{
+          setDefaultMaxPerRoute(clientProperties.getMaxPerRoute());
+          setMaxTotal(clientProperties.getMaxTotal());
+        }})
+        .build();
 
-    httpRequestFactory.setConnectionRequestTimeout(1000);
+    HttpComponentsClientHttpRequestFactory httpRequestFactory
+        = new HttpComponentsClientHttpRequestFactory(httpClient);
+
+    httpRequestFactory.setConnectionRequestTimeout(clientProperties.getRequestTimeout());
     httpRequestFactory.setConnectTimeout(clientProperties.getConnectTimeout());
     httpRequestFactory.setReadTimeout(clientProperties.getReadTimeout());
 
@@ -53,7 +61,7 @@ public class CloudEventsClient {
       return this.restClient.postForEntity(clientProperties.getTargetUri(), event, String.class);
 
     } catch (RestClientException e) {
-      log.error("Rest Exception", e);
+      /* log.error("Rest Exception", e); */
     }
     return null;
   }

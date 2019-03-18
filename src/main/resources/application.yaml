@@ -2,9 +2,11 @@ cloudevents:
   source:
     client:
       targetUri: ${sink:http://localhost:8080}
-#      targetUri: https://test-kn.free.beeceptor.com
+      requestTimeout: 4000
       connectTimeout: 10000
-      readTimeout: 1000
+      readTimeout: 2000
+      maxPerRoute: 100
+      maxTotal: 100
     event:
       eventType: Source.File.Usage
       source: /parser-demo
@@ -17,6 +19,6 @@ spring:
         input:
           destination: notifications
     gcp:
-      project-id: knative-broker
+      project-id: ${gcp.project.id}
       credentials:
         encoded-key: ${gcp.credentials.encoded-key}

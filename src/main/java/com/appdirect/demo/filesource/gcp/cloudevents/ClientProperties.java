@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 public class ClientProperties {
 
   private String targetUri;
+  private int requestTimeout;
   private int connectTimeout;
   private int readTimeout;
+  private int maxPerRoute;
+  private int maxTotal;
 }
