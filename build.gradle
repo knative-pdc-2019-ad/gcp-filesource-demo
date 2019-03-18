@@ -4,6 +4,8 @@ buildscript {
         springCloudBom = 'Greenwich.RELEASE'
         cloudeventsApiVer = '0.2.1'
         apacheHttpVer = '4.5.7'
+        
+        gcpProjectId = 'my-gcp-project'
     }
     
     repositories {
@@ -67,7 +69,7 @@ dependencies {
 
 jib {
     to {
-        image = "gcr.io/knative-broker/gcp-source:${project.version}"
+        image = "gcr.io/${gcpProjectId}/gcp-source:${project.version}"
         credHelper = 'gcr'
     }
 }
